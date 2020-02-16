@@ -1,0 +1,36 @@
+#!/bin/bash -e
+
+# Build script to cross-compile Dropbear for Android
+# Copyright © 2020 Matt Robinson
+
+if [ -z "$ANDROID_NDK_HOME" ]; then
+    if [ "$ANDROID_HOME" ]; then
+        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
+    else
+        echo "Either ANDROID_NDK_HOME or ANDROID_HOME must be set" >&2
+        exit 1
+    fi
+fi
+
+toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+
+
+cd dropbear
+
+# Generate configure and config.h
+autoconf
+autoheader
+
+TARGET=arm-linux-androideabi
+PLATFORM=21
+
+./configure --host=$TARGET \
+    AR="$toolchain/bin/$TARGET-ar" \
+    CC="$toolchain/bin/${TARGET/arm/armv7a}$PLATFORM-clang" \
+    LD="$toolchain/bin/$TARGET-ld" \
+    RANLIB="$toolchain/bin/$TARGET-ranlib" \
+    STRIP="$toolchain/bin/$TARGET-strip"
+
+cp ../localoptions.h .
+
+make

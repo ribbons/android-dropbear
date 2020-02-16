@@ -1,0 +1,65 @@
+name: Build
+on: [push]
+env:
+  SRC_OWNER: mkj
+  SRC_REPO: dropbear
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Query latest release tag
+        uses: octokit/graphql-action@v2.x
+        id: latest_release_data
+        with:
+          query: |
+            query release($owner:String!,$repo:String!) {
+              repository(owner:$owner,name:$repo) {
+                refs(refPrefix: "refs/tags/", first: 1, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+                  edges {
+                    node {
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          owner: ${{ env.SRC_OWNER }}
+          repo: ${{ env.SRC_REPO }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Latest release tag name
+        id: latest_release
+        uses: gr2m/get-json-paths-action@v1.x
+        with:
+          json: ${{ steps.latest_release_data.outputs.data }}
+          name: "repository.refs.edges[0].node.name"
+
+      - name: Checkout latest release
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ env.SRC_OWNER }}/${{ env.SRC_REPO }}
+          ref: ${{ steps.latest_release.outputs.name }}
+          path: ${{ env.SRC_REPO }}
+
+      - name: Build script
+        run: ./build
+
+      - name: Collect binaries
+        run: |
+          mkdir bin
+          cp dropbear/dropbear bin
+          cp dropbear/dbclient bin
+          cp dropbear/dropbearkey bin
+          cp dropbear/dropbearconvert bin
+
+      - name: Upload binaries as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: binaries
+          path: bin
