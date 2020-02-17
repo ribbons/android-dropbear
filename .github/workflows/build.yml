@@ -8,6 +8,11 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - armv7a-linux-androideabi
+          - aarch64-linux-android
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -49,6 +54,8 @@ jobs:
 
       - name: Build script
         run: ./build
+        env:
+          TARGET: ${{ matrix.target }}
 
       - name: Collect binaries
         run: |

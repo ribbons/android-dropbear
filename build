@@ -12,6 +12,9 @@ if [ -z "$ANDROID_NDK_HOME" ]; then
     fi
 fi
 
+TARGET=${TARGET:-armv7a-linux-androideabi}
+PLATFORM=21
+
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 
 
@@ -21,15 +24,12 @@ cd dropbear
 autoconf
 autoheader
 
-TARGET=arm-linux-androideabi
-PLATFORM=21
-
-./configure --host=$TARGET \
-    AR="$toolchain/bin/$TARGET-ar" \
-    CC="$toolchain/bin/${TARGET/arm/armv7a}$PLATFORM-clang" \
-    LD="$toolchain/bin/$TARGET-ld" \
-    RANLIB="$toolchain/bin/$TARGET-ranlib" \
-    STRIP="$toolchain/bin/$TARGET-strip"
+./configure --host="$TARGET" \
+    AR="$toolchain/bin/${TARGET/armv7a/arm}-ar" \
+    CC="$toolchain/bin/$TARGET$PLATFORM-clang" \
+    LD="$toolchain/bin/${TARGET/armv7a/arm}-ld" \
+    RANLIB="$toolchain/bin/${TARGET/armv7a/arm}-ranlib" \
+    STRIP="$toolchain/bin/${TARGET/armv7a/arm}-strip"
 
 cp ../localoptions.h .
 
