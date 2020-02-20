@@ -1,12 +1,12 @@
 name: Build
-on: [push]
+on: [push, pull_request]
 env:
   SRC_OWNER: mkj
   SRC_REPO: dropbear
 
 jobs:
-  build:
-    name: Build
+  compile:
+    name: Compile
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,16 +57,126 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
 
-      - name: Collect binaries
+      - name: Collect binaries and build info
         run: |
-          mkdir bin
-          cp dropbear/dropbear bin
-          cp dropbear/dbclient bin
-          cp dropbear/dropbearkey bin
-          cp dropbear/dropbearconvert bin
+          mkdir output buildinfo
+          cp dropbear/dropbear output
+          cp dropbear/dbclient output
+          cp dropbear/dropbearkey output
+          cp dropbear/dropbearconvert output
+          cp dropbear/LICENSE output/LICENSE.txt
+          echo '${{ steps.latest_release.outputs.name }}' > buildinfo/release
+          grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
+               cut -d ' ' -f 3 >> buildinfo/ndkver
 
       - name: Upload binaries as artifact
         uses: actions/upload-artifact@v1
         with:
-          name: binaries
-          path: bin
+          name: ${{ matrix.target }}
+          path: output
+
+      - name: Upload build info as artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: buildinfo
+          path: buildinfo
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: compile
+
+    steps:
+      - name: Fetch build info artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: buildinfo
+
+      - name: Convert build info to vars
+        run: |
+          echo ::set-env name=BUILD_RELEASE::"$(cat buildinfo/release)"
+          echo ::set-env name=NDK_VERSION::"$(cat buildinfo/ndkver)"
+
+      - name: Query latest release
+        uses: octokit/graphql-action@v2.x
+        id: latest_release_data
+        with:
+          query: |
+            query release($owner:String!,$repo:String!) {
+              repository(owner:$owner,name:$repo) {
+                releases(first:1) {
+                  nodes {
+                    tagName
+                  }
+                }
+              }
+            }
+          owner: ${{ github.event.repository.owner.name }}
+          repo: ${{ github.event.repository.name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Latest release tag name
+        id: latest_release
+        uses: gr2m/get-json-paths-action@v1.x
+        with:
+          json: ${{ steps.latest_release_data.outputs.data }}
+          name: "repository.releases.nodes[0].tagName"
+
+      - name: Fetch armv7a artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: armv7a-linux-androideabi
+
+      - name: Fetch aarch64 artifact
+        uses: actions/download-artifact@v1
+        with:
+          name: aarch64-linux-android
+
+      - name: Package assets
+        run: |
+          zip --junk-paths dropbear-armv7a-linux-androideabi.zip \
+              armv7a-linux-androideabi/*
+          zip --junk-paths dropbear-aarch64-linux-android.zip \
+              aarch64-linux-android/*
+
+      - name: Create release
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.BUILD_RELEASE }}
+          release_name: ${{ env.BUILD_RELEASE }}
+          body: >
+            Dropbear SSH binaries built for Android with NDK version
+            ${{ env.NDK_VERSION }}.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload armv7a-linux-androideabi zip asset
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dropbear-armv7a-linux-androideabi.zip
+          asset_name: dropbear-armv7a-linux-androideabi.zip
+          asset_content_type: application/zip
+
+      - name: Upload aarch64-linux-android zip asset
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dropbear-aarch64-linux-android.zip
+          asset_name: dropbear-aarch64-linux-android.zip
+          asset_content_type: application/zip
