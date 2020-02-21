@@ -97,10 +97,12 @@ jobs:
         with:
           name: buildinfo
 
-      - name: Convert build info to vars
+      - name: Extract info to environment vars
         run: |
           echo ::set-env name=BUILD_RELEASE::"$(cat buildinfo/release)"
           echo ::set-env name=NDK_VERSION::"$(cat buildinfo/ndkver)"
+          echo ::set-env name=REPO_OWNER::"${GITHUB_REPOSITORY%%/*}"
+          echo ::set-env name=REPO_NAME::"${GITHUB_REPOSITORY#*/}"
 
       - name: Query latest release
         uses: octokit/graphql-action@v2.x
@@ -116,8 +118,8 @@ jobs:
                 }
               }
             }
-          owner: ${{ github.event.repository.owner.name }}
-          repo: ${{ github.event.repository.name }}
+          owner: ${{ env.REPO_OWNER }}
+          repo: ${{ env.REPO_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -147,8 +149,9 @@ jobs:
 
       - name: Create release
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
-          github.event_name == 'push' && github.ref == 'refs/heads/master'
+          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
+          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+          github.event_name == 'schedule')
         id: create_release
         uses: actions/create-release@v1
         with:
@@ -162,8 +165,9 @@ jobs:
 
       - name: Upload armv7a-linux-androideabi zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
-          github.event_name == 'push' && github.ref == 'refs/heads/master'
+          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
+          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+          github.event_name == 'schedule')
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -175,8 +179,9 @@ jobs:
 
       - name: Upload aarch64-linux-android zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
-          github.event_name == 'push' && github.ref == 'refs/heads/master'
+          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
+          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
+          github.event_name == 'schedule')
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
