@@ -20,6 +20,8 @@ toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 
 cd dropbear
 
+patch -p1 < ../0001-Fallback-for-key-gen-without-hard-link-support.patch
+
 # Generate configure and config.h
 autoconf
 autoheader
