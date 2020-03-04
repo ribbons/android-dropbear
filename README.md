@@ -6,6 +6,11 @@ Android Dropbear Builds
 Build script and configuration to cross-compile
 [Dropbear](https://matt.ucc.asn.au/dropbear/dropbear.html) for Android.
 
+I've tested the built `dropbearkey` binary and use the `dbclient` binary
+regularly.  The `dropbear` server binary builds successfully but is untested
+and I suspect would benefit from some adjustment of server related options to
+tune it for the Android environment - pull requests welcomed.
+
 
 Precompiled Binaries
 --------------------
