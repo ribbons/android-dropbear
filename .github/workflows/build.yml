@@ -99,10 +99,9 @@ jobs:
 
       - name: Extract info to environment vars
         run: |
-          echo ::set-env name=BUILD_RELEASE::"$(cat buildinfo/release)"
-          echo ::set-env name=NDK_VERSION::"$(cat buildinfo/ndkver)"
-          echo ::set-env name=REPO_OWNER::"${GITHUB_REPOSITORY%%/*}"
-          echo ::set-env name=REPO_NAME::"${GITHUB_REPOSITORY#*/}"
+          echo "BUILD_RELEASE=$(cat buildinfo/release)" >> "$GITHUB_ENV"
+          echo "NDK_VERSION=$(cat buildinfo/ndkver)" >> "$GITHUB_ENV"
+          echo "REPO_NAME=${GITHUB_REPOSITORY#*/}" >> "$GITHUB_ENV"
 
       - name: Query latest release
         uses: octokit/graphql-action@v2.x
@@ -118,7 +117,7 @@ jobs:
                 }
               }
             }
-          owner: ${{ env.REPO_OWNER }}
+          owner: ${{ github.repository_owner }}
           repo: ${{ env.REPO_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
