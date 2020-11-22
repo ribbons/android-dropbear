@@ -13,7 +13,12 @@ if [ -z "$ANDROID_NDK_HOME" ]; then
 fi
 
 TARGET=${TARGET:-armv7a-linux-androideabi}
-PLATFORM=21
+
+if [[ "$TARGET" =~ ^(aarch64|x86_64)- ]]; then
+    PLATFORM=21
+else
+    PLATFORM=16
+fi
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 
