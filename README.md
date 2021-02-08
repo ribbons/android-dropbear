@@ -24,6 +24,4 @@ Manual Build
 
 * Ensure that the Android NDK is located at `$ANDROID_NDK_HOME` or
   `$ANDROID_HOME/ndk-bundle`.
-* Download and unpack the latest Dropbear source into a subfolder named
-  `dropbear`.
 * Run `./build`

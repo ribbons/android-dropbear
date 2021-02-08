@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-# Build script to cross-compile Dropbear for Android
-# Copyright © 2020 Matt Robinson
+# Build script to fetch and cross-compile Dropbear for Android
+# Copyright © 2020-2021 Matt Robinson
 
 if [ -z "$ANDROID_NDK_HOME" ]; then
     if [ "$ANDROID_HOME" ]; then
@@ -21,8 +21,9 @@ else
 fi
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+version=$(cat dropbear-version)
 
-
+git clone --branch "$version" --depth 1 https://github.com/mkj/dropbear.git
 cd dropbear
 
 # Generate configure and config.h

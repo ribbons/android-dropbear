@@ -5,10 +5,6 @@ on:
   schedule:
     - cron: '30 12 * * 5'
 
-env:
-  SRC_OWNER: mkj
-  SRC_REPO: dropbear
-
 jobs:
   compile:
     name: Compile
@@ -21,41 +17,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Query latest release tag
-        uses: octokit/graphql-action@v2.x
-        id: latest_release_data
-        with:
-          query: |
-            query release($owner:String!,$repo:String!) {
-              repository(owner:$owner,name:$repo) {
-                refs(refPrefix:"refs/tags/", first:1, orderBy:{field:TAG_COMMIT_DATE, direction:DESC}) {
-                  edges {
-                    node {
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          owner: ${{ env.SRC_OWNER }}
-          repo: ${{ env.SRC_REPO }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Latest release tag name
-        id: latest_release
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.latest_release_data.outputs.data }}
-          name: "repository.refs.edges[0].node.name"
-
-      - name: Checkout latest release
-        uses: actions/checkout@v2
-        with:
-          repository: ${{ env.SRC_OWNER }}/${{ env.SRC_REPO }}
-          ref: ${{ steps.latest_release.outputs.name }}
-          path: ${{ env.SRC_REPO }}
 
       - name: Build script
         run: ./build
@@ -70,7 +31,7 @@ jobs:
           cp dropbear/dropbearkey output
           cp dropbear/dropbearconvert output
           cp dropbear/LICENSE output/LICENSE.txt
-          echo '${{ steps.latest_release.outputs.name }}' > buildinfo/release
+          cp dropbear-version buildinfo/release
           grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
                cut -d ' ' -f 3 >> buildinfo/ndkver
 
@@ -148,9 +109,8 @@ jobs:
 
       - name: Create release
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
-          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-          github.event_name == 'schedule')
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
         id: create_release
         uses: actions/create-release@v1
         with:
@@ -164,9 +124,8 @@ jobs:
 
       - name: Upload armv7a-linux-androideabi zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
-          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-          github.event_name == 'schedule')
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -178,9 +137,8 @@ jobs:
 
       - name: Upload aarch64-linux-android zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name && (
-          (github.event_name == 'push' && github.ref == 'refs/heads/master') ||
-          github.event_name == 'schedule')
+          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
