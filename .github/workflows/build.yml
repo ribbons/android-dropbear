@@ -62,33 +62,28 @@ jobs:
         run: |
           echo "BUILD_RELEASE=$(cat buildinfo/release)" >> "$GITHUB_ENV"
           echo "NDK_VERSION=$(cat buildinfo/ndkver)" >> "$GITHUB_ENV"
-          echo "REPO_NAME=${GITHUB_REPOSITORY#*/}" >> "$GITHUB_ENV"
 
-      - name: Query latest release
-        uses: octokit/graphql-action@v2.x
-        id: latest_release_data
+      - name: Latest release tag name
+        id: latest_release
+        uses: actions/github-script@v3
         with:
-          query: |
-            query release($owner:String!,$repo:String!) {
-              repository(owner:$owner,name:$repo) {
+          result-encoding: string
+          script: |
+            const query = `query release($owner:String!, $repo:String!) {
+              repository(owner:$owner, name:$repo) {
                 releases(first:1, orderBy:{field:CREATED_AT, direction:DESC}) {
                   nodes {
                     tagName
                   }
                 }
               }
+            }`
+            const vars = {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
             }
-          owner: ${{ github.repository_owner }}
-          repo: ${{ env.REPO_NAME }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Latest release tag name
-        id: latest_release
-        uses: gr2m/get-json-paths-action@v1.x
-        with:
-          json: ${{ steps.latest_release_data.outputs.data }}
-          name: "repository.releases.nodes[0].tagName"
+            const result = await github.graphql(query, vars)
+            return result.repository.releases.nodes[0].tagName
 
       - name: Fetch armv7a artifact
         uses: actions/download-artifact@v1
@@ -109,7 +104,7 @@ jobs:
 
       - name: Create release
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
           github.event_name == 'push' && github.ref == 'refs/heads/master'
         id: create_release
         uses: actions/create-release@v1
@@ -124,7 +119,7 @@ jobs:
 
       - name: Upload armv7a-linux-androideabi zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
           github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-release-asset@v1
         env:
@@ -137,7 +132,7 @@ jobs:
 
       - name: Upload aarch64-linux-android zip asset
         if: >
-          env.BUILD_RELEASE != steps.latest_release.outputs.name &&
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
           github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: actions/upload-release-asset@v1
         env:
