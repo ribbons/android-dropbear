@@ -1,6 +1,7 @@
 name: Build
 on:
   push:
+    branches-ignore: dependabot/**
   pull_request:
   schedule:
     - cron: '30 12 * * 5'

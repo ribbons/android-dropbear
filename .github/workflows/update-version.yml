@@ -1,0 +1,54 @@
+name: Update to new version
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '05 00 * * 1-5'
+
+env:
+  SRC_OWNER: mkj
+  SRC_REPO: dropbear
+
+jobs:
+  check:
+    name: Update to new version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ssh-key: ${{ secrets.ACTIONS_SSH_PRIVATE_KEY }}
+
+      - name: Latest upstream release tag name
+        id: latest_release
+        uses: actions/github-script@v3
+        with:
+          result-encoding: string
+          script: |
+            const query = `query release($owner:String!, $repo:String!) {
+              repository(owner:$owner, name:$repo) {
+                releases(first:1, orderBy:{field:CREATED_AT, direction:DESC}) {
+                  nodes {
+                    tagName
+                  }
+                }
+              }
+            }`
+            const vars = {
+              owner: process.env.SRC_OWNER,
+              repo: process.env.SRC_REPO,
+            }
+            const result = await github.graphql(query, vars)
+            return result.repository.releases.nodes[0].tagName
+
+      - name: Update version file
+        run: |
+          echo "${{ steps.latest_release.outputs.result }}" > "${SRC_REPO}-version"
+
+      - name: Create / update pull request if necessary
+        uses: peter-evans/create-pull-request@34371f09e5a05dadd212d0bc451d4c1fa456c646
+        with:
+          commit-message: Update Dropbear to ${{ steps.latest_release.outputs.result }}
+          title: Update Dropbear to ${{ steps.latest_release.outputs.result }}
+          body: |
+            Updates the version of Dropbear to be built to ${{ steps.latest_release.outputs.result }}.
+          branch: update-version
