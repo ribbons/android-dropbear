@@ -1,4 +1,4 @@
-name: Update to new version
+name: Create PR if new version
 on:
   workflow_dispatch:
   schedule:
@@ -9,8 +9,8 @@ env:
   SRC_REPO: dropbear
 
 jobs:
-  check:
-    name: Update to new version
+  update-version:
+    name: Create PR if new version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -47,6 +47,8 @@ jobs:
       - name: Create / update pull request if necessary
         uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8
         with:
+          author: github-actions[bot] 41898282+github-actions[bot]@users.noreply.github.com
+          committer: github-actions[bot] 41898282+github-actions[bot]@users.noreply.github.com
           commit-message: Update Dropbear to ${{ steps.latest_release.outputs.result }}
           title: Update Dropbear to ${{ steps.latest_release.outputs.result }}
           body: |
