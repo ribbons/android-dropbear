@@ -45,7 +45,7 @@ jobs:
           echo "${{ steps.latest_release.outputs.result }}" > "${SRC_REPO}-version"
 
       - name: Create / update pull request if necessary
-        uses: peter-evans/create-pull-request@34371f09e5a05dadd212d0bc451d4c1fa456c646
+        uses: peter-evans/create-pull-request@052fc72b4198ba9fbc81b818c6e1859f747d49a8
         with:
           commit-message: Update Dropbear to ${{ steps.latest_release.outputs.result }}
           title: Update Dropbear to ${{ steps.latest_release.outputs.result }}
