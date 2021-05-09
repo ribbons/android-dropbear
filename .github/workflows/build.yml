@@ -28,12 +28,12 @@ jobs:
       - name: Collect binaries and build info
         run: |
           mkdir output buildinfo
+          cp dropbear/scp output
           cp dropbear/dropbear output
           cp dropbear/dbclient output
           cp dropbear/dropbearkey output
           cp dropbear/dropbearconvert output
           cp dropbear/LICENSE output/LICENSE.txt
-          cp dropbear/scp output/scp
           cp dropbear-version buildinfo/release
           grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
                cut -d ' ' -f 3 >> buildinfo/ndkver
