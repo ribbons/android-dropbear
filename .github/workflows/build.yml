@@ -31,6 +31,7 @@ jobs:
           cp dropbear/dbclient output
           cp dropbear/dropbearkey output
           cp dropbear/dropbearconvert output
+          cp dropbear/scp output
           cp dropbear/LICENSE output/LICENSE.txt
           cp dropbear-version buildinfo/release
           grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
