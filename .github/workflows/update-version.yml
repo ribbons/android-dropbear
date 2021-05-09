@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        with:
-          ssh-key: ${{ secrets.ACTIONS_SSH_PRIVATE_KEY }}
 
       - name: Latest upstream release tag name
         id: latest_release
