@@ -100,10 +100,12 @@ jobs:
 
       - name: Package assets
         run: |
+          zip --junk-paths dropbear-all.zip ./*
           zip --junk-paths dropbear-armv7a-linux-androideabi.zip \
               armv7a-linux-androideabi/*
           zip --junk-paths dropbear-aarch64-linux-android.zip \
               aarch64-linux-android/*
+
 
       - name: Create release
         if: >
@@ -144,4 +146,17 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dropbear-aarch64-linux-android.zip
           asset_name: dropbear-aarch64-linux-android.zip
+          asset_content_type: application/zip
+
+      - name: Upload all zip asset
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dropbear-all.zip
+          asset_name: dropbear-all.zip
           asset_content_type: application/zip
