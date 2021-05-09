@@ -40,3 +40,4 @@ autoheader
 cp ../localoptions.h .
 
 make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp"
+make scp  
