@@ -5,6 +5,7 @@ on:
   pull_request:
   schedule:
     - cron: '30 12 * * 5'
+  workflow_dispatch:
 
 jobs:
   compile:
