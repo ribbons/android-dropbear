@@ -33,6 +33,7 @@ jobs:
           cp dropbear/dropbearkey output
           cp dropbear/dropbearconvert output
           cp dropbear/LICENSE output/LICENSE.txt
+          cp dropbear/scp output/scp
           cp dropbear-version buildinfo/release
           grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
                cut -d ' ' -f 3 >> buildinfo/ndkver
