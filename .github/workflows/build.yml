@@ -85,7 +85,8 @@ jobs:
               repo: context.repo.repo,
             }
             const result = await github.graphql(query, vars)
-            return result.repository.releases.nodes[0].tagName
+            const node = result.repository.releases.nodes[0]
+            return node?node.tagName:""
 
       - name: Fetch armv7a artifact
         uses: actions/download-artifact@v1
