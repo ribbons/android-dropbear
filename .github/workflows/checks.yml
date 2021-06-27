@@ -1,0 +1,30 @@
+---
+# Copyright © 2021 Matt Robinson
+
+name: Checks
+on:
+  push:
+    branches-ignore: dependabot/**
+  pull_request:
+  schedule:
+    - cron: '30 12 * * 5'
+
+jobs:
+  overcommit:
+    name: Overcommit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install and sign
+        run: |
+          sudo gem install overcommit --no-document
+          overcommit --sign
+          overcommit --sign pre-commit
+
+      - name: Run hooks
+        env:
+          GIT_AUTHOR_NAME: Dummy
+          GIT_AUTHOR_EMAIL: dummy@example.com
+        run: overcommit --run
