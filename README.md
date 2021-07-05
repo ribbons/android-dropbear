@@ -15,8 +15,8 @@ tune it for the Android environment - pull requests welcomed.
 Precompiled Binaries
 --------------------
 
-armv7a and aarch64 binaries compiled under GitHub Actions are available as
-release assets from this repository.
+armv7a, aarch64, i686 and x86_64 Android binaries compiled under GitHub Actions
+are available as release assets from this repository.
 
 
 Manual Build
