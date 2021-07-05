@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 # Copyright © 2021 Matt Robinson
+#
+# SPDX-License-Identifier: MIT
 
 module Overcommit
   module Hook

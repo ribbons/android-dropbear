@@ -1,6 +1,7 @@
 /*
- * Macro definitions for cross-compiling Dropbear for Android
  * Copyright © 2020 Matt Robinson
+ *
+ * SPDX-License-Identifier: MIT
  */
 
 // Disable server password auth as crypt() isn't available under Android

@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
-# Build script to fetch and cross-compile Dropbear for Android
 # Copyright © 2020-2021 Matt Robinson
+#
+# SPDX-License-Identifier: MIT
 
 if [ -z "$ANDROID_NDK_HOME" ]; then
     if [ "$ANDROID_HOME" ]; then
