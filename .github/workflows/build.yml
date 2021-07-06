@@ -71,6 +71,8 @@ jobs:
         run: |
           echo "BUILD_RELEASE=$(cat buildinfo/release)" >> "$GITHUB_ENV"
           echo "NDK_VERSION=$(cat buildinfo/ndkver)" >> "$GITHUB_ENV"
+          echo "JAR_VERSION=$(cat buildinfo/release | \
+                sed -e 's/^DROPBEAR_//')" >> "$GITHUB_ENV"
 
       - name: Latest release tag name
         id: latest_release
@@ -124,6 +126,43 @@ jobs:
               i686-linux-android/*
           zip --junk-paths dropbear-x86_64-linux-android.zip \
               x86_64-linux-android/*
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: adopt
+          java-version: 11
+
+      - name: Package JAR
+        run: |
+          mkdir -p lib/armeabi-v7a lib/arm64-v8a lib/x86 lib/x86_64 META-INF
+          cp -p armv7a-linux-androideabi/dropbear lib/armeabi-v7a/libdropbear.so
+          cp -p armv7a-linux-androideabi/dbclient lib/armeabi-v7a/libdbclient.so
+          cp -p armv7a-linux-androideabi/dropbearkey \
+                lib/armeabi-v7a/libdropbearkey.so
+          cp -p armv7a-linux-androideabi/dropbearconvert \
+                lib/armeabi-v7a/libdropbearconvert.so
+          cp -p armv7a-linux-androideabi/scp lib/armeabi-v7a/libscp.so
+          cp -p aarch64-linux-android/dropbear lib/arm64-v8a/libdropbear.so
+          cp -p aarch64-linux-android/dbclient lib/arm64-v8a/libdbclient.so
+          cp -p aarch64-linux-android/dropbearkey \
+                lib/arm64-v8a/libdropbearkey.so
+          cp -p aarch64-linux-android/dropbearconvert \
+                lib/arm64-v8a/libdropbearconvert.so
+          cp -p aarch64-linux-android/scp lib/arm64-v8a/libscp.so
+          cp -p i686-linux-android/dropbear lib/x86/libdropbear.so
+          cp -p i686-linux-android/dbclient lib/x86/libdbclient.so
+          cp -p i686-linux-android/dropbearkey lib/x86/libdropbearkey.so
+          cp -p i686-linux-android/dropbearconvert lib/x86/libdropbearconvert.so
+          cp -p i686-linux-android/scp lib/x86/libscp.so
+          cp -p x86_64-linux-android/dropbear lib/x86_64/libdropbear.so
+          cp -p x86_64-linux-android/dbclient lib/x86_64/libdbclient.so
+          cp -p x86_64-linux-android/dropbearkey lib/x86_64/libdropbearkey.so
+          cp -p x86_64-linux-android/dropbearconvert \
+                lib/x86_64/libdropbearconvert.so
+          cp -p x86_64-linux-android/scp lib/x86_64/libscp.so
+          cp -p aarch64-linux-android/LICENSE.txt META-INF/LICENSE
+          jar cf android-rsync.jar lib META-INF
 
       - name: Create release
         if: >
@@ -191,3 +230,34 @@ jobs:
           asset_path: ./dropbear-x86_64-linux-android.zip
           asset_name: dropbear-x86_64-linux-android.zip
           asset_content_type: application/zip
+
+      - name: Upload JAR asset
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./android-dropbear.jar
+          asset_name: android-dropbear.jar
+          asset_content_type: application/java-archive
+
+      - name: Upload JAR to package registry
+        if: >
+          env.BUILD_RELEASE != steps.latest_release.outputs.result &&
+          github.event_name == 'push' && github.ref == 'refs/heads/master' &&
+          !contains(env.BUILD_RELEASE, 'pre')
+        run: |
+          mvn --batch-mode deploy:deploy-file \
+            -DgroupId=com.nerdoftheherd \
+            -DartifactId=android-dropbear \
+            -Dversion="${{ env.JAR_VERSION }}" \
+            -Dfile=android-dropbear.jar \
+            -DrepositoryId=github \
+            -Durl=https://maven.pkg.github.com/ribbons/android-dropbear \
+            -DgeneratePom.description="Dropbear binaries built for Android \
+          with NDK version ${{ env.NDK_VERSION }}."
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
