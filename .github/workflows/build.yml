@@ -162,7 +162,7 @@ jobs:
                 lib/x86_64/libdropbearconvert.so
           cp -p x86_64-linux-android/scp lib/x86_64/libscp.so
           cp -p aarch64-linux-android/LICENSE.txt META-INF/LICENSE
-          jar cf android-rsync.jar lib META-INF
+          jar cf android-dropbear.jar lib META-INF
 
       - name: Create release
         if: >
