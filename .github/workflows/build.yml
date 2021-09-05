@@ -33,16 +33,13 @@ jobs:
 
       - name: Collect binaries and build info
         run: |
-          mkdir output buildinfo
+          mkdir output
           cp dropbear/dropbear output
           cp dropbear/dbclient output
           cp dropbear/dropbearkey output
           cp dropbear/dropbearconvert output
           cp dropbear/scp output
           cp dropbear/LICENSE output/LICENSE.txt
-          cp dropbear-version buildinfo/release
-          grep Pkg.Revision "$ANDROID_HOME/ndk-bundle/source.properties" | \
-               cut -d ' ' -f 3 >> buildinfo/ndkver
 
       - name: Upload binaries as artifact
         uses: actions/upload-artifact@v1

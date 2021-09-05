@@ -24,6 +24,11 @@ fi
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 version=$(cat dropbear-version)
 
+[ -d buildinfo ] || mkdir buildinfo
+echo "$version" > buildinfo/release
+grep Pkg.Revision "$ANDROID_NDK_HOME/source.properties" | \
+    cut -d ' ' -f 3 >> buildinfo/ndkver
+
 git clone --branch "$version" --depth 1 https://github.com/mkj/dropbear.git
 cd dropbear
 
