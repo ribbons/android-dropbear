@@ -32,11 +32,10 @@ autoconf
 autoheader
 
 ./configure --host="$TARGET" \
-    AR="$toolchain/bin/${TARGET/armv7a/arm}-ar" \
+    AR="$toolchain/bin/llvm-ar" \
     CC="$toolchain/bin/$TARGET$PLATFORM-clang" \
-    LD="$toolchain/bin/${TARGET/armv7a/arm}-ld" \
-    RANLIB="$toolchain/bin/${TARGET/armv7a/arm}-ranlib" \
-    STRIP="$toolchain/bin/${TARGET/armv7a/arm}-strip"
+    RANLIB="$toolchain/bin/llvm-ranlib" \
+    STRIP="$toolchain/bin/llvm-strip"
 
 cp ../localoptions.h .
 
