@@ -69,7 +69,7 @@ jobs:
           echo "BUILD_RELEASE=$(cat buildinfo/release)" >> "$GITHUB_ENV"
           echo "NDK_VERSION=$(cat buildinfo/ndkver)" >> "$GITHUB_ENV"
           echo "JAR_VERSION=$(cat buildinfo/release | \
-                sed -e 's/^DROPBEAR_//')" >> "$GITHUB_ENV"
+                sed 's/^DROPBEAR_//;s/p/./')" >> "$GITHUB_ENV"
 
       - name: Latest release tag name
         id: latest_release

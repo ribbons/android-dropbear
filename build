@@ -23,14 +23,21 @@ fi
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 version=$(cat dropbear-version)
+patchcount=$(find . -maxdepth 1 -name "*.patch" | wc -l)
 
 [ -d buildinfo ] || mkdir buildinfo
-echo "$version" > buildinfo/release
+echo "$version${patchcount+p$patchcount}" > buildinfo/release
 grep Pkg.Revision "$ANDROID_NDK_HOME/source.properties" | \
     cut -d ' ' -f 3 >> buildinfo/ndkver
 
 git clone --branch "$version" --depth 1 https://github.com/mkj/dropbear.git
 cd dropbear
+
+if [ "$patchcount" -gt 0 ]; then
+    for patch in ../*.patch; do
+        patch -p1 < "$patch"
+    done
+fi
 
 # Generate configure and config.h
 autoconf
