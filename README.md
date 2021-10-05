@@ -29,3 +29,31 @@ Manual Build
 * Ensure that the Android NDK is located at `$ANDROID_NDK_HOME` or
   `$ANDROID_HOME/ndk-bundle`.
 * Run `./build`
+
+
+Example Usage
+-------------
+
+From an Android app with the published package added as a dependency:
+
+``` kotlin
+val libDir = context.applicationInfo.nativeLibraryDir
+
+val args = ArrayList<String>()
+args.add("$libDir/libdbclient.so")
+args.add("test@example.com")
+
+val builder = ProcessBuilder(args)
+val dbclient = builder.start()
+
+val result = dbclient.waitFor()
+val stdout = dbclient.inputStream.bufferedReader().use(BufferedReader::readText)
+val stderr = dbclient.errorStream.bufferedReader().use(BufferedReader::readText)
+
+Log.d(TAG, "Exit code: $result")
+Log.d(TAG, "Standard out: $stdout")
+Log.d(TAG, "Standard error: $stderr")
+```
+
+For a full example, you can check out the source of my
+[Rsync for Tasker](https://github.com/ribbons/TaskerRsync) app.
