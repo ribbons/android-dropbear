@@ -5,6 +5,8 @@ updates:
     directory: /
     schedule:
       interval: daily
+      timezone: Europe/London
+      time: "06:00"
     labels:
       - dependencies
     allow:
