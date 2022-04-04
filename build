@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright © 2020-2021 Matt Robinson
+# Copyright © 2020-2022 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -38,10 +38,6 @@ if [ "$patchcount" -gt 0 ]; then
         patch -p1 < "$patch"
     done
 fi
-
-# Generate configure and config.h
-autoconf
-autoheader
 
 ./configure --host="$TARGET" \
     AR="$toolchain/bin/llvm-ar" \
