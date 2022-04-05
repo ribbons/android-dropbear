@@ -1,12 +1,14 @@
 ---
-# Copyright © 2021 Matt Robinson
+# Copyright © 2021-2022 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
 name: Checks
 on:
   push:
-    branches-ignore: dependabot/**
+    branches-ignore:
+      - dependabot/**
+      - update-version
   pull_request:
   schedule:
     - cron: '30 12 * * 5'
