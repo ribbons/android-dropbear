@@ -51,7 +51,7 @@ jobs:
 
       - name: Create / update pull request if necessary
         # yamllint disable-line rule:line-length
-        uses: peter-evans/create-pull-request@f1a7646cead32c950d90344a4fb5d4e926972a8f
+        uses: peter-evans/create-pull-request@bd72e1b7922d417764d27d30768117ad7da78a0e
         with:
           author: github-actions[bot]
             <41898282+github-actions[bot]@users.noreply.github.com>
