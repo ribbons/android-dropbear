@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright © 2021 Matt Robinson
+# Copyright © 2021-2022 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -17,7 +17,7 @@ module Overcommit
         def run
           messages = []
           outdated = @context.class.name != 'Overcommit::HookContext::RunAll'
-          author_name = ENV['GIT_AUTHOR_NAME']
+          author_name = ENV.fetch('GIT_AUTHOR_NAME', nil)
 
           applicable_files.each do |filename|
             relfile = filename.delete_prefix("#{Overcommit::Utils.repo_root}/")
