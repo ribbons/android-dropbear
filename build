@@ -5,12 +5,8 @@
 # SPDX-License-Identifier: MIT
 
 if [ -z "$ANDROID_NDK_HOME" ]; then
-    if [ "$ANDROID_HOME" ]; then
-        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
-    else
-        echo "Either ANDROID_NDK_HOME or ANDROID_HOME must be set" >&2
-        exit 1
-    fi
+    echo "ANDROID_NDK_HOME is not set" >&2
+    exit 1
 fi
 
 TARGET=${TARGET:-armv7a-linux-androideabi}
