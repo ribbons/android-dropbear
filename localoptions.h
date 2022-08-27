@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Matt Robinson
+ * Copyright © 2020-2022 Matt Robinson
  *
  * SPDX-License-Identifier: MIT
  */
@@ -12,3 +12,6 @@
 
 // Speed up symmetrical ciphers and hashes at the expense of larger binaries
 #define DROPBEAR_SMALL_CODE 0
+
+// Build all but the most verbose level of trace messages into the binaries
+#define DEBUG_TRACE 4
