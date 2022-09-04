@@ -6,6 +6,8 @@ PreCommit:
 
   TrailingWhitespace:
     enabled: true
+    exclude:
+      - '*.patch'
 
   FileEncoding:
     description: Check text files are valid UTF-8
