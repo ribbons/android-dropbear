@@ -1,0 +1,44 @@
+From dc3c1a30cf7ce984986654ec78632f8de7db79c1 Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Wed, 9 Nov 2022 18:40:10 +0800
+Subject: [PATCH] Allow overriding shells for compat getusershell()
+
+---
+ compat.c     | 3 +--
+ sysoptions.h | 9 +++++++++
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/compat.c b/compat.c
+index 7a0e78ac3..8bd6adda5 100644
+--- a/compat.c
++++ b/compat.c
+@@ -231,8 +231,7 @@ void setusershell() {
+ }
+ 
+ static char **initshells() {
+-	/* don't touch this list. */
+-	static const char *okshells[] = { "/bin/sh", "/bin/csh", NULL };
++	static const char *okshells[] = { COMPAT_USER_SHELLS, NULL };
+ 	register char **sp, *cp;
+ 	register FILE *fp;
+ 	struct stat statb;
+diff --git a/sysoptions.h b/sysoptions.h
+index af931ff17..24b902dee 100644
+--- a/sysoptions.h
++++ b/sysoptions.h
+@@ -79,6 +79,15 @@
+ 
+ #define _PATH_CP "/bin/cp"
+ 
++/* Default contents of /etc/shells if system getusershell() doesn't exist.
++ * Paths taken from getusershell(3) manpage. These can be customised
++ * on other platforms. One the commandline for CFLAGS it would look like eg
++  -DCOMPAT_USER_SHELLS='"/bin/sh","/apps/bin/sh","/data/bin/zsh"
++ */
++#ifndef COMPAT_USER_SHELLS
++#define COMPAT_USER_SHELLS "/bin/sh","/bin/csh"
++#endif
++
+ #define DROPBEAR_ESCAPE_CHAR '~'
+ 
+ /* success/failure defines */

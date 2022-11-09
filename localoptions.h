@@ -15,3 +15,6 @@
 
 // Build all but the most verbose level of trace messages into the binaries
 #define DEBUG_TRACE 4
+
+// Change the fallback list of shells to the non-standard Android shell path
+#define COMPAT_USER_SHELLS "/system/bin/sh"
