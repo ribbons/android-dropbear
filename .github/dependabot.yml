@@ -9,5 +9,3 @@ updates:
       time: "06:00"
     labels:
       - dependencies
-    allow:
-      - dependency-name: peter-evans/create-pull-request
