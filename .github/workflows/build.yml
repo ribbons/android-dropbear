@@ -65,10 +65,8 @@ jobs:
     needs: compile
 
     steps:
-      - name: Fetch build info artifact
+      - name: Fetch artifacts
         uses: actions/download-artifact@v3
-        with:
-          name: buildinfo
 
       - name: Extract info to environment vars
         run: |
@@ -98,26 +96,6 @@ jobs:
             }
             const result = await github.graphql(query, vars)
             return result.repository.releases.nodes[0].tagName
-
-      - name: Fetch armv7a artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: armv7a-linux-androideabi
-
-      - name: Fetch aarch64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: aarch64-linux-android
-
-      - name: Fetch i686 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: i686-linux-android
-
-      - name: Fetch x86_64 artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: x86_64-linux-android
 
       - name: Package assets
         run: |
