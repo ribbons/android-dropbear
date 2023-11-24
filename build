@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright © 2020-2022 Matt Robinson
+# Copyright © 2020-2023 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -14,7 +14,7 @@ TARGET=${TARGET:-armv7a-linux-androideabi}
 if [[ "$TARGET" =~ ^(aarch64|x86_64)- ]]; then
     PLATFORM=21
 else
-    PLATFORM=16
+    PLATFORM=19
 fi
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
