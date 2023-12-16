@@ -1,5 +1,5 @@
 ---
-# Copyright © 2020-2022 Matt Robinson
+# Copyright © 2020-2023 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -54,6 +54,7 @@ jobs:
           path: output
 
       - name: Upload build info as artifact
+        if: matrix.target == 'armv7a-linux-androideabi'
         uses: actions/upload-artifact@v4
         with:
           name: buildinfo
