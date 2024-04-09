@@ -8,7 +8,6 @@ on:
   push:
     branches-ignore:
       - dependabot/**
-      - update-version
   pull_request:
   schedule:
     - cron: '30 12 * * 5'
@@ -17,6 +16,9 @@ jobs:
   compile:
     name: Compile
     runs-on: ubuntu-latest
+    if: github.event_name != 'push' ||
+        github.ref != 'refs/heads/update-version' ||
+        github.event.head_commit.committer.name == 'github-actions[bot]'
     strategy:
       matrix:
         target:

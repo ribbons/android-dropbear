@@ -1,5 +1,5 @@
 ---
-# Copyright © 2021-2022 Matt Robinson
+# Copyright © 2021-2024 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -8,7 +8,6 @@ on:
   push:
     branches-ignore:
       - dependabot/**
-      - update-version
   pull_request:
   schedule:
     - cron: '30 12 * * 5'
@@ -17,6 +16,9 @@ jobs:
   overcommit:
     name: Overcommit
     runs-on: ubuntu-latest
+    if: github.event_name != 'push' ||
+        github.ref != 'refs/heads/update-version' ||
+        github.event.head_commit.committer.name == 'github-actions[bot]'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
