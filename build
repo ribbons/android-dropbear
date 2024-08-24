@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright © 2020-2023 Matt Robinson
+# Copyright © 2020-2024 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -10,12 +10,7 @@ if [ -z "$ANDROID_NDK_HOME" ]; then
 fi
 
 TARGET=${TARGET:-armv7a-linux-androideabi}
-
-if [[ "$TARGET" =~ ^(aarch64|x86_64)- ]]; then
-    PLATFORM=21
-else
-    PLATFORM=19
-fi
+PLATFORM=21
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
 version=$(cat dropbear-version)
