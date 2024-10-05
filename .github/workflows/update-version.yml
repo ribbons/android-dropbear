@@ -1,5 +1,5 @@
 ---
-# Copyright © 2021 Matt Robinson
+# Copyright © 2021-2024 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -12,6 +12,10 @@ on:
 env:
   SRC_OWNER: mkj
   SRC_REPO: dropbear
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   update-version:
