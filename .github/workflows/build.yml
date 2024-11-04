@@ -72,9 +72,11 @@ jobs:
 
     permissions:
       contents: write
-      packages: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Fetch artifacts
         uses: actions/download-artifact@v4
 
@@ -83,7 +85,7 @@ jobs:
           echo "BUILD_RELEASE=$(cat buildinfo/release)" >> "$GITHUB_ENV"
           echo "NDK_VERSION=$(cat buildinfo/ndkver)" >> "$GITHUB_ENV"
           echo "JAR_VERSION=$(cat buildinfo/release | \
-                sed 's/^DROPBEAR_//;s/p/./')" >> "$GITHUB_ENV"
+                sed 's/^DROPBEAR_//;s/p/-/')" >> "$GITHUB_ENV"
 
       - name: Latest release tag name
         id: latest_release
@@ -123,37 +125,42 @@ jobs:
         with:
           distribution: adopt
           java-version: 11
+          cache: maven
+          server-id: central
+          server-username: MAVEN_CENTRAL_USERNAME
+          server-password: MAVEN_CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
 
       - name: Package JAR
         run: |
-          mkdir -p lib/armeabi-v7a lib/arm64-v8a lib/x86 lib/x86_64 META-INF
-          cp -p armv7a-linux-androideabi/dropbear lib/armeabi-v7a/libdropbear.so
-          cp -p armv7a-linux-androideabi/dbclient lib/armeabi-v7a/libdbclient.so
-          cp -p armv7a-linux-androideabi/dropbearkey \
-                lib/armeabi-v7a/libdropbearkey.so
-          cp -p armv7a-linux-androideabi/dropbearconvert \
-                lib/armeabi-v7a/libdropbearconvert.so
-          cp -p armv7a-linux-androideabi/scp lib/armeabi-v7a/libscp.so
-          cp -p aarch64-linux-android/dropbear lib/arm64-v8a/libdropbear.so
-          cp -p aarch64-linux-android/dbclient lib/arm64-v8a/libdbclient.so
-          cp -p aarch64-linux-android/dropbearkey \
-                lib/arm64-v8a/libdropbearkey.so
-          cp -p aarch64-linux-android/dropbearconvert \
-                lib/arm64-v8a/libdropbearconvert.so
-          cp -p aarch64-linux-android/scp lib/arm64-v8a/libscp.so
-          cp -p i686-linux-android/dropbear lib/x86/libdropbear.so
-          cp -p i686-linux-android/dbclient lib/x86/libdbclient.so
-          cp -p i686-linux-android/dropbearkey lib/x86/libdropbearkey.so
-          cp -p i686-linux-android/dropbearconvert lib/x86/libdropbearconvert.so
-          cp -p i686-linux-android/scp lib/x86/libscp.so
-          cp -p x86_64-linux-android/dropbear lib/x86_64/libdropbear.so
-          cp -p x86_64-linux-android/dbclient lib/x86_64/libdbclient.so
-          cp -p x86_64-linux-android/dropbearkey lib/x86_64/libdropbearkey.so
-          cp -p x86_64-linux-android/dropbearconvert \
-                lib/x86_64/libdropbearconvert.so
-          cp -p x86_64-linux-android/scp lib/x86_64/libscp.so
-          cp -p aarch64-linux-android/LICENSE.txt META-INF/LICENSE
-          jar cf android-dropbear.jar lib META-INF
+          copyarchbinaries() {
+            mkdir -p src/main/resources/lib/$2
+            cp -p $1/dropbear src/main/resources/lib/$2/libdropbear.so
+            cp -p $1/dbclient src/main/resources/lib/$2/libdbclient.so
+            cp -p $1/dropbearkey src/main/resources/lib/$2/libdropbearkey.so
+            cp -p $1/dropbearconvert \
+                  src/main/resources/lib/$2/libdropbearconvert.so
+            cp -p $1/scp src/main/resources/lib/$2/libscp.so
+          }
+
+          copyarchbinaries armv7a-linux-androideabi armeabi-v7a
+          copyarchbinaries aarch64-linux-android arm64-v8a
+          copyarchbinaries i686-linux-android x86
+          copyarchbinaries x86_64-linux-android x86_64
+
+          mkdir src/main/resources/META-INF
+          cp -p aarch64-linux-android/LICENSE.txt \
+                src/main/resources/META-INF/LICENSE
+
+          mvn --batch-mode versions:set -DnewVersion="${{ env.JAR_VERSION }}"
+          mvn --batch-mode package
+          cp target/android-dropbear-*.jar android-dropbear.jar
+
+      - name: Upload JAR as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: android-dropbear.jar
 
       - name: Create release
         if: >
@@ -202,15 +209,8 @@ jobs:
           env.BUILD_RELEASE != steps.latest_release.outputs.result &&
           github.event_name == 'push' && github.ref == 'refs/heads/master' &&
           !contains(env.BUILD_RELEASE, 'pre')
-        run: |
-          mvn --batch-mode deploy:deploy-file \
-            -DgroupId=com.nerdoftheherd \
-            -DartifactId=android-dropbear \
-            -Dversion="${{ env.JAR_VERSION }}" \
-            -Dfile=android-dropbear.jar \
-            -DrepositoryId=github \
-            -Durl=https://maven.pkg.github.com/ribbons/android-dropbear \
-            -DgeneratePom.description="Dropbear binaries built for Android \
-          with NDK version ${{ env.NDK_VERSION }}."
+        run: mvn --batch-mode deploy
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}

@@ -9,3 +9,12 @@ updates:
       time: "06:00"
     labels:
       - dependencies
+
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: daily
+      timezone: Europe/London
+      time: "06:00"
+    labels:
+      - dependencies

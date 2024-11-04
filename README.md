@@ -20,7 +20,8 @@ are available as release assets from this repository.
 
 There is a JAR release asset containing all of the binaries (renamed to
 lib*name*.so to allow them to be executed from within an Android app).  This is
-also available as a package for ease of use as a dependency in Android Studio.
+also [available as a package](https://central.sonatype.com/artifact/com.nerdoftheherd/android-dropbear)
+for ease of use as a dependency in Android Studio.
 
 
 Manual Build

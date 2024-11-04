@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.nerdoftheherd</groupId>
+  <artifactId>android-dropbear</artifactId>
+  <version>0</version>
+
+  <name>Android Dropbear Binaries</name>
+  <description>Dropbear binaries built for Android</description>
+  <url>https://github.com/ribbons/android-dropbear</url>
+
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://opensource.org/license/mit</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Matt Robinson</name>
+      <url>https://nerdoftheherd.com/</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:https://github.com/ribbons/android-dropbear.git</connection>
+    <developerConnection>scm:git:ssh://github.com/ribbons/android-dropbear.git</developerConnection>
+    <url>https://github.com/ribbons/android-dropbear</url>
+  </scm>
+
+  <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+      <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.7</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+              <groupId>org.sonatype.central</groupId>
+              <artifactId>central-publishing-maven-plugin</artifactId>
+              <version>0.6.0</version>
+              <extensions>true</extensions>
+              <configuration>
+                <autoPublish>true</autoPublish>
+                <deploymentName>${project.artifactId}-${project.version}</deploymentName>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+</project>
