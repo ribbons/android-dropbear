@@ -18,6 +18,7 @@ patches=$(find . -maxdepth 1 -name "*.patch" | wc -l)
 [ "$patches" -lt 1 ] && unset -v patches
 
 [ -d buildinfo ] || mkdir buildinfo
+echo $PLATFORM > buildinfo/minsdk
 echo "$version${patches+p$patches}" > buildinfo/release
 grep Pkg.Revision "$ANDROID_NDK_HOME/source.properties" | \
     cut -d ' ' -f 3 >> buildinfo/ndkver
