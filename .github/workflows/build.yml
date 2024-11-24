@@ -177,7 +177,7 @@ jobs:
               tag_name: process.env.BUILD_RELEASE,
               name: process.env.BUILD_RELEASE,
               body: "Dropbear SSH binaries for Android API level " +
-                    fs.readFileSync("buildinfo/minsdk", "utf8").trimEnd(),
+                    fs.readFileSync("buildinfo/minsdk", "utf8").trimEnd() +
                     " and above, built with NDK version " +
                     fs.readFileSync("buildinfo/ndkver", "utf8").trimEnd(),
             })
