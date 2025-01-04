@@ -1,0 +1,41 @@
+From 6652b471acfa620a2ac1aa2e3d18b806d623ff8a Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Tue, 3 Dec 2024 15:21:46 +0100
+Subject: [PATCH] Docs for -D authorized_keys, check for empty
+
+An empty -D doesn't make sense, so reject it.
+---
+ manpages/dropbear.8 | 4 ++++
+ src/svr-runopts.c   | 4 ++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/manpages/dropbear.8 b/manpages/dropbear.8
+index bdb2ea02..72be0aef 100644
+--- a/manpages/dropbear.8
++++ b/manpages/dropbear.8
+@@ -116,6 +116,10 @@ Disregard the command provided by the user and always run \fIforced_command\fR.
+ overrides any authorized_keys command= option. The original command is saved in the 
+ SSH_ORIGINAL_COMMAND environment variable (see below).
+ .TP
++.B \-D \fIauthorized_keys_dir
++Specify the directory to use for authorized_keys files. The default is ~/.ssh , paths with
++a leading ~/ will be home directory expanded.
++.TP
+ .B \-V
+ Print the version
+ 
+diff --git a/src/svr-runopts.c b/src/svr-runopts.c
+index 579b96d6..709dc576 100644
+--- a/src/svr-runopts.c
++++ b/src/svr-runopts.c
+@@ -456,6 +456,10 @@ void svr_getopts(int argc, char ** argv) {
+ 		dropbear_exit("-t and -s are incompatible");
+ 	}
+ 
++	if (strlen(svr_opts.authorized_keys_dir) == 0) {
++		dropbear_exit("Bad -D");
++	}
++
+ #if DROPBEAR_PLUGIN
+ 	if (pubkey_plugin) {
+ 		svr_opts.pubkey_plugin = m_strdup(pubkey_plugin);
