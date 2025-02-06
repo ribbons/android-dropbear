@@ -8,11 +8,11 @@ module Overcommit
   module Hook
     module PreCommit
       class Copyright < Base
-        COPYRIGHT_REGEX = /© (?:[0-9]{4}-)?(?<year>[0-9]{4}) (?<aut>.+)/.freeze
-        HASHBANG_REGEX = %r{^#! */(?:[a-z]+/)*[a-z0-9]+(?: |$)}.freeze
+        COPYRIGHT_REGEX = /© (?:[0-9]{4}-)?(?<year>[0-9]{4}) (?<aut>.+)/
+        HASHBANG_REGEX = %r{^#! */(?:[a-z]+/)*[a-z0-9]+(?: |$)}
         NAMES_REGEX = /(?:^(?:CMakeLists[.]txt|Gemfile|Rakefile)|[.]
                           (?:bat|[ch]|cpp|cs|s?css|html|java|js|kt[ms]?|php|
-                            p[lm]|rc|rb|sql|wxs))$/x.freeze
+                            p[lm]|rc|rb|sql|wxs))$/x
 
         def run
           messages = []
