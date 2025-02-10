@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright © 2020-2024 Matt Robinson
+# Copyright © 2020-2025 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -40,4 +40,5 @@ fi
 
 cp ../localoptions.h .
 
-make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" SCPPROGRESS=1
+make PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" \
+     SCPPROGRESS=1 strip
