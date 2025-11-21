@@ -24,7 +24,7 @@ jobs:
         github.event.head_commit.committer.name == 'github-actions[bot]'
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Install and sign
         run: |
