@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Fetch artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
 
       - name: Extract version to environment vars
         run: |
