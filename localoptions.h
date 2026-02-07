@@ -17,6 +17,9 @@
 #define DEBUG_TRACE 4
 
 // Include non-standard shell path prior to Android 11 in default shell list
+#if __ANDROID_MIN_SDK_VERSION__ > 30
+    #error "COMPAT_USER_SHELLS override no longer needed"
+#endif
 #define COMPAT_USER_SHELLS "/bin/sh","/system/bin/sh"
 
 // Enable use of /dev/ptmx until openpty() is available
