@@ -32,7 +32,7 @@ if [ "$patches" ]; then
     done
 fi
 
-./configure --host="$TARGET" --disable-lastlog --disable-wtmp \
+./configure --host="$TARGET" --disable-lastlog --disable-utmp --disable-wtmp \
     AR="$toolchain/bin/llvm-ar" \
     CC="$toolchain/bin/$TARGET$PLATFORM-clang" \
     RANLIB="$toolchain/bin/llvm-ranlib" \
