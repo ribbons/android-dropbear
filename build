@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright © 2020-2025 Matt Robinson
+# Copyright © 2020-2026 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -32,7 +32,7 @@ if [ "$patches" ]; then
     done
 fi
 
-./configure --host="$TARGET" \
+./configure --host="$TARGET" --disable-lastlog --disable-wtmp \
     AR="$toolchain/bin/llvm-ar" \
     CC="$toolchain/bin/$TARGET$PLATFORM-clang" \
     RANLIB="$toolchain/bin/llvm-ranlib" \
