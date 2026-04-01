@@ -4,9 +4,9 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: cron
+      cronjob: 30 6 * * *
       timezone: Europe/London
-      time: "06:00"
     cooldown:
       default-days: 7
     labels:
@@ -15,9 +15,9 @@ updates:
   - package-ecosystem: maven
     directory: /
     schedule:
-      interval: daily
+      interval: cron
+      cronjob: 30 6 * * *
       timezone: Europe/London
-      time: "06:00"
     cooldown:
       default-days: 7
       semver-minor-days: 9
