@@ -27,3 +27,9 @@
     #error "USE_DEV_PTMX define no longer needed as openpty() is now available"
 #endif
 #define USE_DEV_PTMX 1
+
+// Compat macro for reallocarray() until it is available
+#if __ANDROID_MIN_SDK_VERSION__ >= 29
+    #error "reallocarray macro no longer needed"
+#endif
+#define reallocarray(ptr, nelem, elsize) realloc(ptr, (nelem * elsize))
