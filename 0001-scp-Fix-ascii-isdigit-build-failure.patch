@@ -1,0 +1,175 @@
+From 5ae1e29a2e86ae567bc3c301555f7341b2d37249 Mon Sep 17 00:00:00 2001
+From: Matt Johnston <matt@ucc.asn.au>
+Date: Wed, 22 Jul 2026 19:05:14 +0800
+Subject: [PATCH] scp: Fix ascii_isdigit build failure
+
+Move ctype replacements to dbctype.c, include it for scp.
+
+Fixes: 7af125aa4bb8 ("Move ctype replacement functions to dbutil.c")
+---
+ Makefile.in    |  4 ++--
+ src/dbctype.c  | 36 ++++++++++++++++++++++++++++++++++++
+ src/dbctype.h  | 13 +++++++++++++
+ src/dbutil.c   | 35 -----------------------------------
+ src/dbutil.h   |  9 ---------
+ src/includes.h |  1 +
+ 6 files changed, 52 insertions(+), 46 deletions(-)
+ create mode 100644 src/dbctype.c
+ create mode 100644 src/dbctype.h
+
+diff --git a/Makefile.in b/Makefile.in
+index a26f0112..8f178ee2 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -44,7 +44,7 @@ _COMMONOBJS=dbutil.o buffer.o dbhelpers.o \
+ 		atomicio.o compat.o fake-rfc2553.o \
+ 		ltc_prng.o ecc.o ecdsa.o sk-ecdsa.o crypto_desc.o \
+ 		curve25519.o ed25519.o sk-ed25519.o \
+-		dbmalloc.o \
++		dbmalloc.o dbctype.o \
+ 		gensignkey.o gendss.o genrsa.o gened25519.o
+ COMMONOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_COMMONOBJS))
+ 
+@@ -74,7 +74,7 @@ KEYOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_KEYOBJS))
+ _CONVERTOBJS=dropbearconvert.o keyimport.o signkey_ossh.o
+ CONVERTOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_CONVERTOBJS))
+ 
+-_SCPOBJS=scp.o progressmeter.o atomicio.o scpmisc.o compat.o
++_SCPOBJS=scp.o progressmeter.o atomicio.o scpmisc.o compat.o dbctype.o
+ SCPOBJS = $(patsubst %,$(OBJ_DIR)/%,$(_SCPOBJS))
+ 
+ ifeq (@DROPBEAR_FUZZ@, 1)
+diff --git a/src/dbctype.c b/src/dbctype.c
+new file mode 100644
+index 00000000..a456fd05
+--- /dev/null
++++ b/src/dbctype.c
+@@ -0,0 +1,36 @@
++#include "dbctype.h"
++
++/* Locale-independent replacements for the <ctype.h> character
++   classification functions. The standard ones have undefined behaviour
++   when passed a plain char with a value that doesn't fit in unsigned
++   char, and their results can vary with locale. Dropbear only cares
++   about ASCII ranges, so simple comparisons suffice. Bytes outside
++   0-127 never match. */
++
++int ascii_isdigit(char c) {
++    return c >= '0' && c <= '9';
++}
++
++int ascii_isalpha(char c) {
++    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
++}
++
++int ascii_isalnum(char c) {
++    return ascii_isalpha(c) || ascii_isdigit(c);
++}
++
++int ascii_isspace(char c) {
++    return c == ' ' || c == '\t' || c == '\n'
++        || c == '\v' || c == '\f' || c == '\r';
++}
++
++int ascii_isprint(char c) {
++    return c >= 0x20 && c <= 0x7e;
++}
++
++char ascii_tolower(char c) {
++    if (c >= 'A' && c <= 'Z') {
++        return c + ('a' - 'A');
++    }
++    return c;
++}
+diff --git a/src/dbctype.h b/src/dbctype.h
+new file mode 100644
+index 00000000..661a5403
+--- /dev/null
++++ b/src/dbctype.h
+@@ -0,0 +1,13 @@
++#ifndef DBCTYPE_H
++#define DBCTYPE_H
++
++/* Sensible ctype alternatives */
++int ascii_isdigit(char c);
++int ascii_isalpha(char c);
++int ascii_isalnum(char c);
++int ascii_isspace(char c);
++int ascii_isprint(char c);
++char ascii_tolower(char c);
++
++#endif
++
+diff --git a/src/dbutil.c b/src/dbutil.c
+index 75d1ba9b..a3414131 100644
+--- a/src/dbutil.c
++++ b/src/dbutil.c
+@@ -879,38 +879,3 @@ void cleantext(char* dirtytext, int allow_whitespace) {
+ 	/* Null terminate */
+ 	dirtytext[j] = '\0';
+ }
+-
+-/* Locale-independent replacements for the <ctype.h> character
+-   classification functions. The standard ones have undefined behaviour
+-   when passed a plain char with a value that doesn't fit in unsigned
+-   char, and their results can vary with locale. Dropbear only cares
+-   about ASCII ranges, so simple comparisons suffice. Bytes outside
+-   0-127 never match. */
+-
+-int ascii_isdigit(char c) {
+-	return c >= '0' && c <= '9';
+-}
+-
+-int ascii_isalpha(char c) {
+-	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+-}
+-
+-int ascii_isalnum(char c) {
+-	return ascii_isalpha(c) || ascii_isdigit(c);
+-}
+-
+-int ascii_isspace(char c) {
+-	return c == ' ' || c == '\t' || c == '\n'
+-		|| c == '\v' || c == '\f' || c == '\r';
+-}
+-
+-int ascii_isprint(char c) {
+-	return c >= 0x20 && c <= 0x7e;
+-}
+-
+-char ascii_tolower(char c) {
+-	if (c >= 'A' && c <= 'Z') {
+-		return c + ('a' - 'A');
+-	}
+-	return c;
+-}
+diff --git a/src/dbutil.h b/src/dbutil.h
+index de8a390d..008fced1 100644
+--- a/src/dbutil.h
++++ b/src/dbutil.h
+@@ -118,13 +118,4 @@ int scp_main(int argc, char ** argv);
+ 
+ #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+ 
+-
+-/* Sensible ctype alternatives */
+-int ascii_isdigit(char c);
+-int ascii_isalpha(char c);
+-int ascii_isalnum(char c);
+-int ascii_isspace(char c);
+-int ascii_isprint(char c);
+-char ascii_tolower(char c);
+-
+ #endif /* DROPBEAR_DBUTIL_H_ */
+diff --git a/src/includes.h b/src/includes.h
+index ddaa7d1c..e2ca2a38 100644
+--- a/src/includes.h
++++ b/src/includes.h
+@@ -148,6 +148,7 @@
+ #endif
+ 
+ #include "compat.h"
++#include "dbctype.h"
+ 
+ #ifndef HAVE_U_INT8_T
+ typedef unsigned char u_int8_t;
