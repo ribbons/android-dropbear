@@ -13,6 +13,7 @@ TARGET=${TARGET:-armv7a-linux-androideabi}
 PLATFORM=21
 
 toolchain=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64
+upstream=mkj/dropbear
 version=$(cat dropbear-version)
 patches=$(find . -maxdepth 1 -name "*.patch" | wc -l)
 [ "$patches" -lt 1 ] && unset -v patches
@@ -23,14 +24,22 @@ echo "$version${patches+p$patches}" > buildinfo/release
 grep Pkg.Revision "$ANDROID_NDK_HOME/source.properties" | \
     cut -d ' ' -f 3 >> buildinfo/ndkver
 
-git clone --branch "$version" --depth 1 https://github.com/mkj/dropbear.git
+git clone -b "$version" --depth 1 https://github.com/$upstream.git
 cd dropbear
 
+builtfrom="upstream commit $upstream@$(git rev-parse HEAD)"
+
 if [ "$patches" ]; then
+    [ "$patches" -gt 1 ] && plural="es"
+    builtfrom+=" plus the following patch$plural:"$'\n'
+
     for patch in ../*.patch; do
         patch -p1 < "$patch"
+        builtfrom+=$'\n- '$(basename "$patch" .patch)
     done
 fi
+
+echo "$builtfrom" > ../buildinfo/builtfrom
 
 ./configure --host="$TARGET" --disable-lastlog --disable-utmp --disable-wtmp \
     AR="$toolchain/bin/llvm-ar" \

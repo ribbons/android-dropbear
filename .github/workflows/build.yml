@@ -1,5 +1,5 @@
 ---
-# Copyright © 2020-2024 Matt Robinson
+# Copyright © 2020-2026 Matt Robinson
 #
 # SPDX-License-Identifier: MIT
 
@@ -179,7 +179,9 @@ jobs:
               body: "Dropbear SSH binaries for Android API level " +
                     fs.readFileSync("buildinfo/minsdk", "utf8").trimEnd() +
                     " and above, built with NDK version " +
-                    fs.readFileSync("buildinfo/ndkver", "utf8").trimEnd(),
+                    fs.readFileSync("buildinfo/ndkver", "utf8").trimEnd() +
+                    " from " +
+                    fs.readFileSync("buildinfo/builtfrom", "utf8").trimEnd(),
             })
 
             const assets = [
