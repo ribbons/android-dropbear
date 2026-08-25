@@ -122,7 +122,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v6
         with:
-          distribution: adopt
+          distribution: temurin
           java-version: 11
           cache: maven
           server-id: central
