@@ -1,8 +1,6 @@
 Android Dropbear Builds
 =======================
 
-![Build status](https://github.com/ribbons/android-dropbear/workflows/Build/badge.svg)
-
 Build script and configuration to cross-compile
 [Dropbear](https://matt.ucc.asn.au/dropbear/dropbear.html) for Android.
 
