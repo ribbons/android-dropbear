@@ -128,7 +128,6 @@ jobs:
           server-id: central
           server-username: MAVEN_CENTRAL_USERNAME
           server-password: MAVEN_CENTRAL_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_SIGNING_KEY }}
 
       - name: Package JAR
         run: |
@@ -212,8 +211,9 @@ jobs:
           env.BUILD_RELEASE != steps.latest_release.outputs.result &&
           github.event_name == 'push' && github.ref == 'refs/heads/master' &&
           !contains(env.BUILD_RELEASE, 'pre')
-        run: mvn --batch-mode deploy
+        run: mvn --batch-mode deploy -Dgpg.signer=bc
         env:
+          MAVEN_GPG_KEY: ${{ secrets.GPG_SIGNING_KEY }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
           MAVEN_CENTRAL_USERNAME: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
